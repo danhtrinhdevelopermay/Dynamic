@@ -33,6 +33,13 @@ import com.suspended.hyperisland.R
 import com.suspended.hyperisland.manager.*
 import com.suspended.hyperisland.model.IslandEvent
 import com.suspended.hyperisland.ui.components.DynamicIsland
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     
@@ -72,12 +79,15 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     
     private lateinit var windowManager: WindowManager
     private var overlayView: View? = null
+    private var overlayParams: WindowManager.LayoutParams? = null
     
     private lateinit var mediaManager: MediaManager
     private lateinit var timerManager: TimerManager
     private lateinit var flashlightManager: FlashlightManager
     private lateinit var chargingManager: ChargingManager
+    private lateinit var settingsManager: SettingsManager
     
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val handler = Handler(Looper.getMainLooper())
     
     private val lifecycleRegistry = LifecycleRegistry(this)
@@ -126,10 +136,42 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         timerManager = TimerManager()
         flashlightManager = FlashlightManager(this)
         chargingManager = ChargingManager(this)
+        settingsManager = SettingsManager(this)
         
         mediaManager.initialize()
         flashlightManager.initialize()
         chargingManager.initialize()
+        
+        observeSettingsChanges()
+    }
+    
+    private fun observeSettingsChanges() {
+        serviceScope.launch {
+            combine(
+                settingsManager.positionX,
+                settingsManager.positionY,
+                settingsManager.sizeScale
+            ) { x, y, scale ->
+                Triple(x, y, scale)
+            }.collect { (x, y, _) ->
+                updateOverlayPosition(x, y)
+            }
+        }
+    }
+    
+    private fun updateOverlayPosition(x: Int, y: Int) {
+        overlayParams?.let { params ->
+            params.x = x
+            params.y = y
+            overlayView?.let { view ->
+                try {
+                    windowManager.updateViewLayout(view, params)
+                    Log.d(TAG, "Overlay position updated: x=$x, y=$y")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to update overlay position", e)
+                }
+            }
+        }
     }
     
     private fun createNotification(): Notification {
@@ -151,7 +193,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     }
     
     private fun createOverlayView() {
-        val params = WindowManager.LayoutParams(
+        overlayParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -167,6 +209,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+            x = 0
             y = 0
         }
         
@@ -178,13 +221,14 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 DynamicIslandOverlay(
                     mediaManager = mediaManager,
                     timerManager = timerManager,
-                    flashlightManager = flashlightManager
+                    flashlightManager = flashlightManager,
+                    settingsManager = settingsManager
                 )
             }
         }
         
         try {
-            windowManager.addView(overlayView, params)
+            windowManager.addView(overlayView, overlayParams)
             Log.d(TAG, "Overlay view added successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to add overlay view", e)
@@ -230,6 +274,8 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         Log.d(TAG, "OverlayService onDestroy")
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         
+        serviceScope.cancel()
+        
         NotificationListenerService.setConnectionCallback(null)
         IslandStateManager.removeEventListener(eventListener)
         
@@ -254,12 +300,15 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
 fun DynamicIslandOverlay(
     mediaManager: MediaManager,
     timerManager: TimerManager,
-    flashlightManager: FlashlightManager
+    flashlightManager: FlashlightManager,
+    settingsManager: SettingsManager
 ) {
     val state by IslandStateManager.state.collectAsState()
+    val sizeScale by settingsManager.sizeScale.collectAsState(initial = SettingsManager.DEFAULT_SIZE_SCALE)
     
     DynamicIsland(
         state = state,
+        sizeScale = sizeScale,
         onExpand = { type ->
             IslandStateManager.processEvent(IslandEvent.ExpandIsland(type))
         },

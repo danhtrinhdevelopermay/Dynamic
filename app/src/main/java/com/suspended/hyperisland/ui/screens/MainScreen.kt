@@ -23,8 +23,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.suspended.hyperisland.manager.SettingsManager
 import com.suspended.hyperisland.service.OverlayService
 import com.suspended.hyperisland.ui.theme.IslandColors
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
@@ -33,8 +35,15 @@ fun MainScreen(
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+    
+    val settingsManager = remember { SettingsManager(context) }
+    val positionX by settingsManager.positionX.collectAsState(initial = SettingsManager.DEFAULT_POSITION_X)
+    val positionY by settingsManager.positionY.collectAsState(initial = SettingsManager.DEFAULT_POSITION_Y)
+    val sizeScale by settingsManager.sizeScale.collectAsState(initial = SettingsManager.DEFAULT_SIZE_SCALE)
     
     var showTimerDialog by remember { mutableStateOf(false) }
+    var showSettingsDialog by remember { mutableStateOf(false) }
     
     Column(
         modifier = Modifier
@@ -123,6 +132,66 @@ fun MainScreen(
                         uncheckedThumbColor = IslandColors.TextSecondary,
                         uncheckedTrackColor = IslandColors.SurfaceVariant
                     )
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { showSettingsDialog = true },
+            colors = CardDefaults.cardColors(
+                containerColor = IslandColors.Surface
+            ),
+            shape = RoundedCornerShape(20.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Tune,
+                        contentDescription = null,
+                        tint = IslandColors.Primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    
+                    Spacer(modifier = Modifier.width(16.dp))
+                    
+                    Column {
+                        Text(
+                            text = "Position & Size",
+                            color = IslandColors.TextPrimary,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        
+                        Spacer(modifier = Modifier.height(4.dp))
+                        
+                        Text(
+                            text = "Adjust Dynamic Island position and size",
+                            color = IslandColors.TextSecondary,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+                
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = IslandColors.TextSecondary,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -256,6 +325,27 @@ fun MainScreen(
                 OverlayService.startTimer(context, duration)
                 showTimerDialog = false
             }
+        )
+    }
+    
+    if (showSettingsDialog) {
+        SettingsDialog(
+            positionX = positionX,
+            positionY = positionY,
+            sizeScale = sizeScale,
+            onPositionXChange = { x ->
+                scope.launch { settingsManager.setPositionX(x) }
+            },
+            onPositionYChange = { y ->
+                scope.launch { settingsManager.setPositionY(y) }
+            },
+            onSizeScaleChange = { scale ->
+                scope.launch { settingsManager.setSizeScale(scale) }
+            },
+            onReset = {
+                scope.launch { settingsManager.resetToDefaults() }
+            },
+            onDismiss = { showSettingsDialog = false }
         )
     }
 }
@@ -441,6 +531,171 @@ private fun TimerDialog(
                     text = "Cancel",
                     color = IslandColors.TextSecondary
                 )
+            }
+        }
+    )
+}
+
+@Composable
+private fun SettingsDialog(
+    positionX: Int,
+    positionY: Int,
+    sizeScale: Float,
+    onPositionXChange: (Int) -> Unit,
+    onPositionYChange: (Int) -> Unit,
+    onSizeScaleChange: (Float) -> Unit,
+    onReset: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = IslandColors.Surface,
+        title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Position & Size",
+                    color = IslandColors.TextPrimary,
+                    fontWeight = FontWeight.SemiBold
+                )
+                
+                IconButton(
+                    onClick = onReset,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Reset",
+                        tint = IslandColors.TextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Horizontal Position (X)",
+                    color = IslandColors.TextSecondary,
+                    fontSize = 13.sp
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${positionX}px",
+                        color = IslandColors.TextPrimary,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.width(60.dp)
+                    )
+                    
+                    Slider(
+                        value = positionX.toFloat(),
+                        onValueChange = { onPositionXChange(it.toInt()) },
+                        valueRange = SettingsManager.MIN_POSITION_X.toFloat()..SettingsManager.MAX_POSITION_X.toFloat(),
+                        modifier = Modifier.weight(1f),
+                        colors = SliderDefaults.colors(
+                            thumbColor = IslandColors.Primary,
+                            activeTrackColor = IslandColors.Primary,
+                            inactiveTrackColor = IslandColors.SurfaceVariant
+                        )
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = "Vertical Position (Y)",
+                    color = IslandColors.TextSecondary,
+                    fontSize = 13.sp
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${positionY}px",
+                        color = IslandColors.TextPrimary,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.width(60.dp)
+                    )
+                    
+                    Slider(
+                        value = positionY.toFloat(),
+                        onValueChange = { onPositionYChange(it.toInt()) },
+                        valueRange = SettingsManager.MIN_POSITION_Y.toFloat()..SettingsManager.MAX_POSITION_Y.toFloat(),
+                        modifier = Modifier.weight(1f),
+                        colors = SliderDefaults.colors(
+                            thumbColor = IslandColors.Primary,
+                            activeTrackColor = IslandColors.Primary,
+                            inactiveTrackColor = IslandColors.SurfaceVariant
+                        )
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = "Size Scale",
+                    color = IslandColors.TextSecondary,
+                    fontSize = 13.sp
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${(sizeScale * 100).toInt()}%",
+                        color = IslandColors.TextPrimary,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.width(60.dp)
+                    )
+                    
+                    Slider(
+                        value = sizeScale,
+                        onValueChange = { onSizeScaleChange(it) },
+                        valueRange = SettingsManager.MIN_SIZE_SCALE..SettingsManager.MAX_SIZE_SCALE,
+                        modifier = Modifier.weight(1f),
+                        colors = SliderDefaults.colors(
+                            thumbColor = IslandColors.Primary,
+                            activeTrackColor = IslandColors.Primary,
+                            inactiveTrackColor = IslandColors.SurfaceVariant
+                        )
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = "Changes are applied instantly. Use the sliders to adjust the Dynamic Island position and size in real-time.",
+                    color = IslandColors.TextTertiary,
+                    fontSize = 12.sp
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = IslandColors.Primary
+                )
+            ) {
+                Text("Done")
             }
         }
     )

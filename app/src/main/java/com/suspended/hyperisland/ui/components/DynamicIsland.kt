@@ -22,6 +22,7 @@ import com.suspended.hyperisland.ui.theme.IslandColors
 @Composable
 fun DynamicIsland(
     state: IslandState,
+    sizeScale: Float = 1.0f,
     onExpand: (IslandType) -> Unit,
     onCollapse: () -> Unit,
     onMediaPlayPause: () -> Unit,
@@ -37,19 +38,38 @@ fun DynamicIsland(
 ) {
     val density = LocalDensity.current
     
+    val baseWidth = when (state.mode) {
+        IslandMode.COMPACT -> 120.dp
+        IslandMode.MEDIUM -> when (state.type) {
+            IslandType.MEDIA -> 200.dp
+            IslandType.TIMER -> 160.dp
+            IslandType.CHARGING -> 140.dp
+            IslandType.NOTIFICATION -> 280.dp
+            IslandType.FILE_TRANSFER -> 280.dp
+            else -> 160.dp
+        }
+        IslandMode.EXPANDED -> 340.dp
+    }
+    
+    val baseHeight = when (state.mode) {
+        IslandMode.COMPACT -> 36.dp
+        IslandMode.MEDIUM -> when (state.type) {
+            IslandType.NOTIFICATION, IslandType.FILE_TRANSFER -> 72.dp
+            else -> 36.dp
+        }
+        IslandMode.EXPANDED -> when (state.type) {
+            IslandType.MEDIA -> 180.dp
+            IslandType.TIMER -> 80.dp
+            IslandType.NOTIFICATION -> 100.dp
+            IslandType.FILE_TRANSFER -> 110.dp
+            IslandType.FLASHLIGHT -> 80.dp
+            IslandType.CHARGING -> 80.dp
+            else -> 120.dp
+        }
+    }
+    
     val islandWidth by animateDpAsState(
-        targetValue = when (state.mode) {
-            IslandMode.COMPACT -> 120.dp
-            IslandMode.MEDIUM -> when (state.type) {
-                IslandType.MEDIA -> 200.dp
-                IslandType.TIMER -> 160.dp
-                IslandType.CHARGING -> 140.dp
-                IslandType.NOTIFICATION -> 280.dp
-                IslandType.FILE_TRANSFER -> 280.dp
-                else -> 160.dp
-            }
-            IslandMode.EXPANDED -> 340.dp
-        },
+        targetValue = baseWidth * sizeScale,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
@@ -58,22 +78,7 @@ fun DynamicIsland(
     )
     
     val islandHeight by animateDpAsState(
-        targetValue = when (state.mode) {
-            IslandMode.COMPACT -> 36.dp
-            IslandMode.MEDIUM -> when (state.type) {
-                IslandType.NOTIFICATION, IslandType.FILE_TRANSFER -> 72.dp
-                else -> 36.dp
-            }
-            IslandMode.EXPANDED -> when (state.type) {
-                IslandType.MEDIA -> 180.dp
-                IslandType.TIMER -> 80.dp
-                IslandType.NOTIFICATION -> 100.dp
-                IslandType.FILE_TRANSFER -> 110.dp
-                IslandType.FLASHLIGHT -> 80.dp
-                IslandType.CHARGING -> 80.dp
-                else -> 120.dp
-            }
-        },
+        targetValue = baseHeight * sizeScale,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
@@ -81,12 +86,14 @@ fun DynamicIsland(
         label = "islandHeight"
     )
     
+    val baseCornerRadius = when (state.mode) {
+        IslandMode.COMPACT -> 18.dp
+        IslandMode.MEDIUM -> 24.dp
+        IslandMode.EXPANDED -> 32.dp
+    }
+    
     val cornerRadius by animateDpAsState(
-        targetValue = when (state.mode) {
-            IslandMode.COMPACT -> 18.dp
-            IslandMode.MEDIUM -> 24.dp
-            IslandMode.EXPANDED -> 32.dp
-        },
+        targetValue = baseCornerRadius * sizeScale,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
