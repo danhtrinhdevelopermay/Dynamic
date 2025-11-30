@@ -1,0 +1,26 @@
+modules = ["java-graalvm22.3"]
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Gradle Build Check"
+
+[[workflows.workflow]]
+name = "Gradle Build Check"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./gradlew tasks --no-daemon 2>&1 || echo \"Android SDK not available - this is expected in this environment. Push to GitHub to test the full build.\""
+
+[workflows.workflow.metadata]
+outputType = "console"

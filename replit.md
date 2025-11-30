@@ -57,6 +57,14 @@ Push to main/master branch triggers automatic APK build. Download from Releases.
 - FOREGROUND_SERVICE - Background operation
 
 ## Recent Changes
+- **2025-11-30**: Fixed corrupted `gradlew` script that was causing GitHub Actions build failures
+  - Error was: `./gradlew: 208: s~.*~\&'~; : not found` and `Could not find or load main class "-Xmx64m"`
+  - Solution: Replaced with latest official Gradle wrapper script from gradle/gradle repository
 - Initial project setup with full HyperOS 3-style Dynamic Island
 - Implemented all core features: media, timer, charging, flashlight, notifications
 - Added GitHub Actions for automated APK builds
+
+## Build Notes
+- This project requires Android SDK to build, which is not available in Replit
+- Push changes to GitHub to trigger automated APK builds via GitHub Actions
+- Download APK artifacts from the GitHub Actions workflow run

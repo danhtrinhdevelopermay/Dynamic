@@ -1,0 +1,236 @@
+2025-11-30T01:10:05.1525589Z Current runner version: '2.329.0'
+2025-11-30T01:10:05.1561511Z ##[group]Runner Image Provisioner
+2025-11-30T01:10:05.1562620Z Hosted Compute Agent
+2025-11-30T01:10:05.1563751Z Version: 20251016.436
+2025-11-30T01:10:05.1564733Z Commit: 8ab8ac8bfd662a3739dab9fe09456aba92132568
+2025-11-30T01:10:05.1565830Z Build Date: 2025-10-15T20:44:12Z
+2025-11-30T01:10:05.1567022Z ##[endgroup]
+2025-11-30T01:10:05.1567874Z ##[group]Operating System
+2025-11-30T01:10:05.1568996Z Ubuntu
+2025-11-30T01:10:05.1569739Z 24.04.3
+2025-11-30T01:10:05.1570540Z LTS
+2025-11-30T01:10:05.1571222Z ##[endgroup]
+2025-11-30T01:10:05.1572211Z ##[group]Runner Image
+2025-11-30T01:10:05.1573197Z Image: ubuntu-24.04
+2025-11-30T01:10:05.1573981Z Version: 20251112.124.1
+2025-11-30T01:10:05.1575868Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20251112.124/images/ubuntu/Ubuntu2404-Readme.md
+2025-11-30T01:10:05.1578826Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20251112.124
+2025-11-30T01:10:05.1581097Z ##[endgroup]
+2025-11-30T01:10:05.1582841Z ##[group]GITHUB_TOKEN Permissions
+2025-11-30T01:10:05.1586112Z Contents: read
+2025-11-30T01:10:05.1586928Z Metadata: read
+2025-11-30T01:10:05.1587620Z Packages: read
+2025-11-30T01:10:05.1588514Z ##[endgroup]
+2025-11-30T01:10:05.1591961Z Secret source: Actions
+2025-11-30T01:10:05.1592962Z Prepare workflow directory
+2025-11-30T01:10:05.2044508Z Prepare all required actions
+2025-11-30T01:10:05.2101139Z Getting action download info
+2025-11-30T01:10:05.5193008Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2025-11-30T01:10:05.8368429Z Download action repository 'actions/setup-java@v4' (SHA:c5195efecf7bdfc987ee8bae7a71cb8b11521c00)
+2025-11-30T01:10:06.1578369Z Download action repository 'gradle/actions@v3' (SHA:d9c87d481d55275bb5441eef3fe0e46805f9ef70)
+2025-11-30T01:10:06.8150678Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-11-30T01:10:07.3715836Z Complete job name: build
+2025-11-30T01:10:07.4376637Z ##[group]Run actions/checkout@v4
+2025-11-30T01:10:07.4377286Z with:
+2025-11-30T01:10:07.4377716Z   repository: danhtrinhdevelopermay/Dynamic
+2025-11-30T01:10:07.4378243Z   token: ***
+2025-11-30T01:10:07.4378473Z   ssh-strict: true
+2025-11-30T01:10:07.4379239Z   ssh-user: git
+2025-11-30T01:10:07.4379508Z   persist-credentials: true
+2025-11-30T01:10:07.4379813Z   clean: true
+2025-11-30T01:10:07.4380143Z   sparse-checkout-cone-mode: true
+2025-11-30T01:10:07.4380490Z   fetch-depth: 1
+2025-11-30T01:10:07.4380764Z   fetch-tags: false
+2025-11-30T01:10:07.4381086Z   show-progress: true
+2025-11-30T01:10:07.4381414Z   lfs: false
+2025-11-30T01:10:07.4381641Z   submodules: false
+2025-11-30T01:10:07.4381965Z   set-safe-directory: true
+2025-11-30T01:10:07.4382569Z ##[endgroup]
+2025-11-30T01:10:07.5486648Z Syncing repository: danhtrinhdevelopermay/Dynamic
+2025-11-30T01:10:07.5489398Z ##[group]Getting Git version info
+2025-11-30T01:10:07.5490500Z Working directory is '/home/runner/work/Dynamic/Dynamic'
+2025-11-30T01:10:07.5491710Z [command]/usr/bin/git version
+2025-11-30T01:10:07.5569424Z git version 2.51.2
+2025-11-30T01:10:07.5595834Z ##[endgroup]
+2025-11-30T01:10:07.5618557Z Temporarily overriding HOME='/home/runner/work/_temp/44febef6-d763-4add-9ff0-e1865410ed60' before making global git config changes
+2025-11-30T01:10:07.5620444Z Adding repository directory to the temporary git global config as a safe directory
+2025-11-30T01:10:07.5624960Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Dynamic/Dynamic
+2025-11-30T01:10:07.5661924Z Deleting the contents of '/home/runner/work/Dynamic/Dynamic'
+2025-11-30T01:10:07.5665711Z ##[group]Initializing the repository
+2025-11-30T01:10:07.5670353Z [command]/usr/bin/git init /home/runner/work/Dynamic/Dynamic
+2025-11-30T01:10:07.5812198Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-11-30T01:10:07.5812992Z hint: is subject to change. To configure the initial branch name to use in all
+2025-11-30T01:10:07.5814299Z hint: of your new repositories, which will suppress this warning, call:
+2025-11-30T01:10:07.5815031Z hint:
+2025-11-30T01:10:07.5815412Z hint: 	git config --global init.defaultBranch <name>
+2025-11-30T01:10:07.5816045Z hint:
+2025-11-30T01:10:07.5816413Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-11-30T01:10:07.5817012Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-11-30T01:10:07.5817537Z hint:
+2025-11-30T01:10:07.5817804Z hint: 	git branch -m <name>
+2025-11-30T01:10:07.5818116Z hint:
+2025-11-30T01:10:07.5818501Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-11-30T01:10:07.5822793Z Initialized empty Git repository in /home/runner/work/Dynamic/Dynamic/.git/
+2025-11-30T01:10:07.5833369Z [command]/usr/bin/git remote add origin https://github.com/danhtrinhdevelopermay/Dynamic
+2025-11-30T01:10:07.5868298Z ##[endgroup]
+2025-11-30T01:10:07.5869216Z ##[group]Disabling automatic garbage collection
+2025-11-30T01:10:07.5872496Z [command]/usr/bin/git config --local gc.auto 0
+2025-11-30T01:10:07.5901385Z ##[endgroup]
+2025-11-30T01:10:07.5901874Z ##[group]Setting up auth
+2025-11-30T01:10:07.5908099Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-11-30T01:10:07.5937829Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-11-30T01:10:07.6301395Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-11-30T01:10:07.6330599Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-11-30T01:10:07.6549859Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2025-11-30T01:10:07.6580690Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2025-11-30T01:10:07.6799816Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-11-30T01:10:07.6880737Z ##[endgroup]
+2025-11-30T01:10:07.6881688Z ##[group]Fetching the repository
+2025-11-30T01:10:07.6884050Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +c8a1570049376f4ceba4e67f49dd27921c3b6d43:refs/remotes/origin/main
+2025-11-30T01:10:07.8800486Z From https://github.com/danhtrinhdevelopermay/Dynamic
+2025-11-30T01:10:07.8801741Z  * [new ref]         c8a1570049376f4ceba4e67f49dd27921c3b6d43 -> origin/main
+2025-11-30T01:10:07.8837831Z ##[endgroup]
+2025-11-30T01:10:07.8838493Z ##[group]Determining the checkout info
+2025-11-30T01:10:07.8839759Z ##[endgroup]
+2025-11-30T01:10:07.8846017Z [command]/usr/bin/git sparse-checkout disable
+2025-11-30T01:10:07.8890866Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2025-11-30T01:10:07.8919073Z ##[group]Checking out the ref
+2025-11-30T01:10:07.8924190Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2025-11-30T01:10:07.9038031Z Switched to a new branch 'main'
+2025-11-30T01:10:07.9041878Z branch 'main' set up to track 'origin/main'.
+2025-11-30T01:10:07.9048437Z ##[endgroup]
+2025-11-30T01:10:07.9085450Z [command]/usr/bin/git log -1 --format=%H
+2025-11-30T01:10:07.9108018Z c8a1570049376f4ceba4e67f49dd27921c3b6d43
+2025-11-30T01:10:07.9360955Z ##[group]Run actions/setup-java@v4
+2025-11-30T01:10:07.9361232Z with:
+2025-11-30T01:10:07.9361424Z   java-version: 17
+2025-11-30T01:10:07.9361615Z   distribution: temurin
+2025-11-30T01:10:07.9361814Z   cache: gradle
+2025-11-30T01:10:07.9361994Z   java-package: jdk
+2025-11-30T01:10:07.9362185Z   check-latest: false
+2025-11-30T01:10:07.9362372Z   server-id: github
+2025-11-30T01:10:07.9362574Z   server-username: GITHUB_ACTOR
+2025-11-30T01:10:07.9362996Z   server-password: GITHUB_TOKEN
+2025-11-30T01:10:07.9363226Z   overwrite-settings: true
+2025-11-30T01:10:07.9363443Z   job-status: success
+2025-11-30T01:10:07.9363795Z   token: ***
+2025-11-30T01:10:07.9363990Z ##[endgroup]
+2025-11-30T01:10:08.1277826Z ##[group]Installed distributions
+2025-11-30T01:10:08.1519069Z Resolved Java 17.0.17+10 from tool-cache
+2025-11-30T01:10:08.1520098Z Setting Java 17.0.17+10 as the default
+2025-11-30T01:10:08.1533894Z Creating toolchains.xml for JDK version 17 from temurin
+2025-11-30T01:10:08.1612271Z Writing to /home/runner/.m2/toolchains.xml
+2025-11-30T01:10:08.1613110Z 
+2025-11-30T01:10:08.1613326Z Java configuration:
+2025-11-30T01:10:08.1613733Z   Distribution: temurin
+2025-11-30T01:10:08.1614107Z   Version: 17.0.17+10
+2025-11-30T01:10:08.1615363Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
+2025-11-30T01:10:08.1616010Z 
+2025-11-30T01:10:08.1616459Z ##[endgroup]
+2025-11-30T01:10:08.1634003Z Creating settings.xml with server-id: github
+2025-11-30T01:10:08.1637438Z Writing to /home/runner/.m2/settings.xml
+2025-11-30T01:10:08.3298834Z gradle cache is not found
+2025-11-30T01:10:08.3528822Z ##[group]Run gradle/actions/setup-gradle@v3
+2025-11-30T01:10:08.3529168Z with:
+2025-11-30T01:10:08.3529355Z   cache-disabled: false
+2025-11-30T01:10:08.3529578Z   cache-read-only: false
+2025-11-30T01:10:08.3529820Z   cache-write-only: false
+2025-11-30T01:10:08.3530036Z   cache-overwrite-existing: false
+2025-11-30T01:10:08.3530338Z   gradle-home-cache-includes: caches
+notifications
+
+2025-11-30T01:10:08.3530683Z   gradle-home-cache-cleanup: false
+2025-11-30T01:10:08.3530929Z   add-job-summary: always
+2025-11-30T01:10:08.3531165Z   add-job-summary-as-pr-comment: never
+2025-11-30T01:10:08.3531421Z   dependency-graph: disabled
+2025-11-30T01:10:08.3531676Z   dependency-graph-continue-on-failure: true
+2025-11-30T01:10:08.3531944Z   build-scan-publish: false
+2025-11-30T01:10:08.3532169Z   validate-wrappers: false
+2025-11-30T01:10:08.3532380Z   generate-job-summary: true
+2025-11-30T01:10:08.3532637Z   gradle-home-cache-strict-match: false
+2025-11-30T01:10:08.3532937Z   workflow-job-context: null
+2025-11-30T01:10:08.3533333Z   github-token: ***
+2025-11-30T01:10:08.3533516Z env:
+2025-11-30T01:10:08.3533800Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
+2025-11-30T01:10:08.3534253Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
+2025-11-30T01:10:08.3534595Z ##[endgroup]
+2025-11-30T01:10:09.7895202Z Merged default JDK locations into /home/runner/.m2/toolchains.xml
+2025-11-30T01:10:09.7898198Z ##[group]Restore Gradle state from cache
+2025-11-30T01:10:09.9046979Z ##[warning]Failed to restore gradle-home-v1|Linux|build[620c74083efa5b88ef904c2356f72d31]-c8a1570049376f4ceba4e67f49dd27921c3b6d43: Error: Cache service responded with 400
+2025-11-30T01:10:09.9102686Z Gradle User Home cache not found. Will initialize empty.
+2025-11-30T01:10:09.9103459Z ##[endgroup]
+2025-11-30T01:10:09.9229312Z ##[group]Run chmod +x gradlew
+2025-11-30T01:10:09.9229669Z [36;1mchmod +x gradlew[0m
+2025-11-30T01:10:09.9264066Z shell: /usr/bin/bash -e {0}
+2025-11-30T01:10:09.9264333Z env:
+2025-11-30T01:10:09.9264619Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
+2025-11-30T01:10:09.9265082Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
+2025-11-30T01:10:09.9265487Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2025-11-30T01:10:09.9265787Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2025-11-30T01:10:09.9266049Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2025-11-30T01:10:09.9266467Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2025-11-30T01:10:09.9266926Z   DEVELOCITY_AUTO_INJECTION_CUSTOM_VALUE: gradle-actions
+2025-11-30T01:10:09.9267218Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2025-11-30T01:10:09.9267452Z ##[endgroup]
+2025-11-30T01:10:09.9389553Z ##[group]Run gradle/actions/wrapper-validation@v3
+2025-11-30T01:10:09.9389888Z with:
+2025-11-30T01:10:09.9390246Z   min-wrapper-count: 1
+2025-11-30T01:10:09.9390465Z   allow-snapshots: false
+2025-11-30T01:10:09.9390671Z env:
+2025-11-30T01:10:09.9390957Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
+2025-11-30T01:10:09.9391412Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
+2025-11-30T01:10:09.9391798Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2025-11-30T01:10:09.9392086Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2025-11-30T01:10:09.9392356Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2025-11-30T01:10:09.9392759Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2025-11-30T01:10:09.9393228Z   DEVELOCITY_AUTO_INJECTION_CUSTOM_VALUE: gradle-actions
+2025-11-30T01:10:09.9393582Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2025-11-30T01:10:09.9393825Z ##[endgroup]
+2025-11-30T01:10:10.1157467Z ✓ Found known Gradle Wrapper JAR files:
+2025-11-30T01:10:10.1158507Z   a8451eeda314d0568b5340498b36edf147a8f0d692c5ff58082d477abe9146e4 gradle/wrapper/gradle-wrapper.jar
+2025-11-30T01:10:10.1253134Z ##[group]Run ./gradlew assembleDebug --no-daemon --stacktrace
+2025-11-30T01:10:10.1253881Z [36;1m./gradlew assembleDebug --no-daemon --stacktrace[0m
+2025-11-30T01:10:10.1300197Z shell: /usr/bin/bash -e {0}
+2025-11-30T01:10:10.1300586Z env:
+2025-11-30T01:10:10.1301068Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
+2025-11-30T01:10:10.1301907Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.17-10/x64
+2025-11-30T01:10:10.1302638Z   GRADLE_ACTION_ID: gradle/actions/wrapper-validation
+2025-11-30T01:10:10.1303194Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2025-11-30T01:10:10.1303675Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2025-11-30T01:10:10.1304406Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2025-11-30T01:10:10.1305265Z   DEVELOCITY_AUTO_INJECTION_CUSTOM_VALUE: gradle-actions
+2025-11-30T01:10:10.1305826Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2025-11-30T01:10:10.1306322Z ##[endgroup]
+2025-11-30T01:10:10.1405432Z sed: -e expression #1, char 8: unterminated `s' command
+2025-11-30T01:10:10.1416812Z echo: write error: Broken pipe
+2025-11-30T01:10:10.1426714Z echo: write error: Broken pipe
+2025-11-30T01:10:10.1432245Z ./gradlew: 208: s~.*~\&'~; : not found
+2025-11-30T01:10:10.2806672Z Error: Could not find or load main class "-Xmx64m"
+2025-11-30T01:10:10.2807618Z Caused by: java.lang.ClassNotFoundException: "-Xmx64m"
+2025-11-30T01:10:10.2857165Z ##[error]Process completed with exit code 1.
+2025-11-30T01:10:10.2972404Z Post job cleanup.
+2025-11-30T01:10:10.5302448Z In post-action step
+2025-11-30T01:10:10.5308829Z Stopping all Gradle daemons before saving Gradle User Home state
+2025-11-30T01:10:10.5312303Z ##[group]Caching Gradle state
+2025-11-30T01:10:10.5437671Z Caching Gradle User Home with cache key: gradle-home-v1|Linux|build[620c74083efa5b88ef904c2356f72d31]-c8a1570049376f4ceba4e67f49dd27921c3b6d43
+2025-11-30T01:10:10.5639922Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/Dynamic/Dynamic --files-from manifest.txt --use-compress-program zstdmt
+2025-11-30T01:10:10.6704273Z ##[warning]Failed to save cache entry with path '/home/runner/.gradle/caches,/home/runner/.gradle/notifications,/home/runner/.gradle/.setup-gradle' and key: gradle-home-v1|Linux|build[620c74083efa5b88ef904c2356f72d31]-c8a1570049376f4ceba4e67f49dd27921c3b6d43: Error: <h2>Our services aren't available right now</h2><p>We're working to restore all services as soon as possible. Please check back soon.</p>0cpkraQAAAABPJ408i6wcQI7PlEQzLS7xUEhMMzBFREdFMDExOABFZGdl
+2025-11-30T01:10:10.6771124Z ##[endgroup]
+2025-11-30T01:10:10.6776216Z Generating Job Summary
+2025-11-30T01:10:10.6789679Z Completed post-action step
+2025-11-30T01:10:10.6917756Z Post job cleanup.
+2025-11-30T01:10:10.8691190Z Post job cleanup.
+2025-11-30T01:10:10.9657373Z [command]/usr/bin/git version
+2025-11-30T01:10:10.9699120Z git version 2.51.2
+2025-11-30T01:10:10.9743159Z Temporarily overriding HOME='/home/runner/work/_temp/8e76faff-6ccf-4a90-9a80-b582ef72808a' before making global git config changes
+2025-11-30T01:10:10.9744510Z Adding repository directory to the temporary git global config as a safe directory
+2025-11-30T01:10:10.9749937Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Dynamic/Dynamic
+2025-11-30T01:10:10.9797902Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-11-30T01:10:10.9838804Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-11-30T01:10:11.0085250Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-11-30T01:10:11.0107731Z http.https://github.com/.extraheader
+2025-11-30T01:10:11.0120631Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-11-30T01:10:11.0152401Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-11-30T01:10:11.0389708Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2025-11-30T01:10:11.0421887Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2025-11-30T01:10:11.0772593Z Cleaning up orphan processes
