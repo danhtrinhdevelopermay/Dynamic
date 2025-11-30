@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HyperIsland</string>
+    <string name="channel_name">HyperIsland Service</string>
+    <string name="channel_description">Keeps HyperIsland running in the background</string>
+    <string name="notification_title">HyperIsland is active</string>
+    <string name="notification_text">Tap to open settings</string>
+    <string name="permission_overlay_title">Overlay Permission Required</string>
+    <string name="permission_overlay_desc">HyperIsland needs permission to display over other apps</string>
+    <string name="permission_notification_title">Notification Access Required</string>
+    <string name="permission_notification_desc">HyperIsland needs access to notifications to display them</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="timer">Timer</string>
+    <string name="recording">Recording</string>
+    <string name="charging">Charging</string>
+    <string name="flashlight">Flashlight</string>
+    <string name="flashlight_on">Flashlight is on</string>
+    <string name="turn_off">Turn off</string>
+    <string name="decline">Decline</string>
+    <string name="accept">Accept</string>
+    <string name="remind_later">Remind later</string>
+</resources>

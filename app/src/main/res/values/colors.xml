@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- HyperOS 3 Dynamic Island Colors -->
+    <color name="island_background">#1A1A1A</color>
+    <color name="island_background_expanded">#2A2A2A</color>
+    <color name="island_text_primary">#FFFFFF</color>
+    <color name="island_text_secondary">#B0B0B0</color>
+    <color name="island_accent_blue">#4A90D9</color>
+    <color name="island_accent_green">#4CD964</color>
+    <color name="island_accent_red">#FF3B30</color>
+    <color name="island_accent_orange">#FF9500</color>
+    <color name="island_accent_yellow">#FFCC00</color>
+    <color name="island_accent_purple">#AF52DE</color>
+    
+    <!-- Timer colors -->
+    <color name="timer_green">#34C759</color>
+    
+    <!-- Recording colors -->
+    <color name="recording_red">#FF453A</color>
+    
+    <!-- Charging colors -->
+    <color name="charging_green">#30D158</color>
+    <color name="charging_yellow">#FFD60A</color>
+    
+    <!-- Media player colors -->
+    <color name="media_progress_bg">#3D3D3D</color>
+    <color name="media_progress_fill">#FFFFFF</color>
+    
+    <!-- Button colors -->
+    <color name="button_accept">#34C759</color>
+    <color name="button_decline">#48484A</color>
+    
+    <!-- App theme colors -->
+    <color name="background_dark">#0D0D0D</color>
+    <color name="surface_dark">#1C1C1E</color>
+    <color name="primary">#4A90D9</color>
+</resources>
