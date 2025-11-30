@@ -7,9 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.util.Log
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
@@ -34,6 +36,40 @@ import com.suspended.hyperisland.ui.components.DynamicIsland
 
 class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     
+    companion object {
+        private const val TAG = "OverlayService"
+        const val ACTION_START_TIMER = "com.suspended.hyperisland.START_TIMER"
+        const val ACTION_STOP_TIMER = "com.suspended.hyperisland.STOP_TIMER"
+        const val ACTION_TOGGLE_TIMER = "com.suspended.hyperisland.TOGGLE_TIMER"
+        const val EXTRA_TIMER_DURATION = "timer_duration"
+        
+        fun start(context: Context) {
+            val intent = Intent(context, OverlayService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        }
+        
+        fun stop(context: Context) {
+            val intent = Intent(context, OverlayService::class.java)
+            context.stopService(intent)
+        }
+        
+        fun startTimer(context: Context, durationMs: Long) {
+            val intent = Intent(context, OverlayService::class.java).apply {
+                action = ACTION_START_TIMER
+                putExtra(EXTRA_TIMER_DURATION, durationMs)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+        }
+    }
+    
     private lateinit var windowManager: WindowManager
     private var overlayView: View? = null
     
@@ -41,6 +77,8 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     private lateinit var timerManager: TimerManager
     private lateinit var flashlightManager: FlashlightManager
     private lateinit var chargingManager: ChargingManager
+    
+    private val handler = Handler(Looper.getMainLooper())
     
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
@@ -57,6 +95,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     
     override fun onCreate() {
         super.onCreate()
+        Log.d(TAG, "OverlayService onCreate")
         
         savedStateRegistryController.performRestore(null)
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
@@ -73,6 +112,13 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         lifecycleRegistry.currentState = Lifecycle.State.RESUMED
         
         createOverlayView()
+        
+        NotificationListenerService.setConnectionCallback {
+            handler.post {
+                Log.d(TAG, "NotificationListener connected, reinitializing MediaManager")
+                mediaManager.reinitialize()
+            }
+        }
     }
     
     private fun initializeManagers() {
@@ -81,23 +127,9 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         flashlightManager = FlashlightManager(this)
         chargingManager = ChargingManager(this)
         
-        try {
-            mediaManager.initialize()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        
-        try {
-            flashlightManager.initialize()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        
-        try {
-            chargingManager.initialize()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        mediaManager.initialize()
+        flashlightManager.initialize()
+        chargingManager.initialize()
     }
     
     private fun createNotification(): Notification {
@@ -125,6 +157,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             } else {
+                @Suppress("DEPRECATION")
                 WindowManager.LayoutParams.TYPE_PHONE
             },
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
@@ -152,8 +185,9 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         
         try {
             windowManager.addView(overlayView, params)
+            Log.d(TAG, "Overlay view added successfully")
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to add overlay view", e)
         }
     }
     
@@ -193,15 +227,17 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     override fun onBind(intent: Intent?): IBinder? = null
     
     override fun onDestroy() {
+        Log.d(TAG, "OverlayService onDestroy")
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         
+        NotificationListenerService.setConnectionCallback(null)
         IslandStateManager.removeEventListener(eventListener)
         
         overlayView?.let {
             try {
                 windowManager.removeView(it)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Failed to remove overlay view", e)
             }
         }
         
@@ -211,39 +247,6 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         chargingManager.release()
         
         super.onDestroy()
-    }
-    
-    companion object {
-        const val ACTION_START_TIMER = "com.suspended.hyperisland.START_TIMER"
-        const val ACTION_STOP_TIMER = "com.suspended.hyperisland.STOP_TIMER"
-        const val ACTION_TOGGLE_TIMER = "com.suspended.hyperisland.TOGGLE_TIMER"
-        const val EXTRA_TIMER_DURATION = "timer_duration"
-        
-        fun start(context: Context) {
-            val intent = Intent(context, OverlayService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
-        }
-        
-        fun stop(context: Context) {
-            val intent = Intent(context, OverlayService::class.java)
-            context.stopService(intent)
-        }
-        
-        fun startTimer(context: Context, durationMs: Long) {
-            val intent = Intent(context, OverlayService::class.java).apply {
-                action = ACTION_START_TIMER
-                putExtra(EXTRA_TIMER_DURATION, durationMs)
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
-        }
     }
 }
 

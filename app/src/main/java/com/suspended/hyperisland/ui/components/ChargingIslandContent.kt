@@ -1,7 +1,6 @@
 package com.suspended.hyperisland.ui.components
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,11 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,11 +39,7 @@ private fun ChargingCompact(chargingState: ChargingState) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val batteryColor = when {
-            chargingState.batteryLevel < 20 -> IslandColors.AccentRed
-            chargingState.batteryLevel < 50 -> IslandColors.ChargingYellow
-            else -> IslandColors.ChargingGreen
-        }
+        val batteryColor = getBatteryColor(chargingState.batteryLevel)
         
         Icon(
             imageVector = Icons.Default.BatteryChargingFull,
@@ -78,11 +68,7 @@ private fun ChargingMedium(chargingState: ChargingState) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val batteryColor = when {
-            chargingState.batteryLevel < 20 -> IslandColors.AccentRed
-            chargingState.batteryLevel < 50 -> IslandColors.ChargingYellow
-            else -> IslandColors.ChargingGreen
-        }
+        val batteryColor = getBatteryColor(chargingState.batteryLevel)
         
         Icon(
             imageVector = Icons.Default.BatteryChargingFull,
@@ -105,7 +91,7 @@ private fun ChargingMedium(chargingState: ChargingState) {
         }
         
         Text(
-            text = "${String.format("%.2f", chargingState.batteryLevel.toFloat())}%",
+            text = "${chargingState.batteryLevel}%",
             color = IslandColors.TextPrimary,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold
@@ -135,11 +121,7 @@ private fun ChargingExpanded(chargingState: ChargingState) {
         label = "pulse"
     )
     
-    val batteryColor = when {
-        chargingState.batteryLevel < 20 -> IslandColors.AccentRed
-        chargingState.batteryLevel < 50 -> IslandColors.ChargingYellow
-        else -> IslandColors.ChargingGreen
-    }
+    val batteryColor = getBatteryColor(chargingState.batteryLevel)
     
     Column(
         modifier = Modifier
@@ -155,23 +137,23 @@ private fun ChargingExpanded(chargingState: ChargingState) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Text(
+                    text = "${chargingState.batteryLevel}%",
+                    color = IslandColors.TextPrimary,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                
                 if (chargingState.chargingWattage > 0) {
+                    Spacer(modifier = Modifier.width(12.dp))
+                    
                     Text(
                         text = "${chargingState.chargingWattage.toInt()}W",
                         color = IslandColors.ChargingGreen,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
-                    
-                    Spacer(modifier = Modifier.width(12.dp))
                 }
-                
-                Text(
-                    text = "${String.format("%.2f", chargingState.batteryLevel.toFloat())}%",
-                    color = IslandColors.TextPrimary,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
             }
             
             Icon(
@@ -202,24 +184,16 @@ private fun ChargingExpanded(chargingState: ChargingState) {
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Charging",
-                color = IslandColors.TextSecondary,
-                fontSize = 12.sp
-            )
-            
-            if (chargingState.estimatedTimeToFull > 0) {
-                val minutes = chargingState.estimatedTimeToFull / 60000
-                Text(
-                    text = "${minutes}min until full",
-                    color = IslandColors.TextSecondary,
-                    fontSize = 12.sp
-                )
-            }
-        }
+        Text(
+            text = if (chargingState.chargingWattage > 0) "Fast charging" else "Charging",
+            color = IslandColors.TextSecondary,
+            fontSize = 12.sp
+        )
     }
+}
+
+private fun getBatteryColor(level: Int) = when {
+    level < 20 -> IslandColors.AccentRed
+    level < 50 -> IslandColors.ChargingYellow
+    else -> IslandColors.ChargingGreen
 }

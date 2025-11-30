@@ -7,22 +7,13 @@
     
     <!-- Foreground service permission -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
-    <!-- Battery and charging info -->
-    <uses-permission android:name="android.permission.BATTERY_STATS" tools:ignore="ProtectedPermissions" />
-    
-    <!-- Camera for flashlight -->
+    <!-- Camera and flashlight -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
-    
-    <!-- Audio recording detection -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    
-    <!-- Media session -->
-    <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" tools:ignore="ProtectedPermissions" />
+    <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
     
     <!-- Vibration for feedback -->
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -58,11 +49,7 @@
             android:name=".service.OverlayService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="overlay_display" />
-        </service>
+            android:foregroundServiceType="mediaPlayback" />
 
         <!-- Notification Listener Service -->
         <service
@@ -73,12 +60,6 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-
-        <!-- Media Controller Service -->
-        <service
-            android:name=".service.MediaControllerService"
-            android:enabled="true"
-            android:exported="false" />
 
         <!-- Boot Receiver -->
         <receiver

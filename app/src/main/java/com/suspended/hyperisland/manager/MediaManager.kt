@@ -2,47 +2,107 @@ package com.suspended.hyperisland.manager
 
 import android.content.ComponentName
 import android.content.Context
-import android.graphics.Bitmap
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.suspended.hyperisland.model.IslandEvent
 import com.suspended.hyperisland.model.MediaState
 import com.suspended.hyperisland.service.NotificationListenerService
 
 class MediaManager(private val context: Context) {
     
+    companion object {
+        private const val TAG = "MediaManager"
+    }
+    
     private var mediaSessionManager: MediaSessionManager? = null
     private var activeController: MediaController? = null
     private var mediaCallback: MediaController.Callback? = null
     private val handler = Handler(Looper.getMainLooper())
     private var positionUpdateRunnable: Runnable? = null
+    private var isInitialized = false
+    private var isListenerRegistered = false
     
     private val sessionListener = MediaSessionManager.OnActiveSessionsChangedListener { controllers ->
-        updateActiveController(controllers)
+        handler.post {
+            updateActiveController(controllers)
+        }
     }
     
     fun initialize() {
+        if (isInitialized) {
+            Log.d(TAG, "Already initialized")
+            return
+        }
+        
+        if (!NotificationListenerService.isConnected) {
+            Log.d(TAG, "NotificationListener not connected yet, deferring initialization")
+            return
+        }
+        
         try {
-            mediaSessionManager = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+            mediaSessionManager = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as? MediaSessionManager
+            
+            if (mediaSessionManager == null) {
+                Log.w(TAG, "MediaSessionManager not available")
+                return
+            }
+            
             val componentName = ComponentName(context, NotificationListenerService::class.java)
             
             val controllers = mediaSessionManager?.getActiveSessions(componentName)
-            updateActiveController(controllers)
-            
-            mediaSessionManager?.addOnActiveSessionsChangedListener(sessionListener, componentName)
+            if (controllers != null) {
+                updateActiveController(controllers)
+                
+                if (!isListenerRegistered) {
+                    mediaSessionManager?.addOnActiveSessionsChangedListener(sessionListener, componentName)
+                    isListenerRegistered = true
+                }
+                
+                isInitialized = true
+                Log.d(TAG, "MediaManager initialized successfully with ${controllers.size} sessions")
+            }
         } catch (e: SecurityException) {
-            e.printStackTrace()
+            Log.w(TAG, "SecurityException during initialization - notification access not granted")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize MediaManager", e)
         }
+    }
+    
+    fun reinitialize() {
+        Log.d(TAG, "Reinitializing MediaManager")
+        
+        stopPositionUpdates()
+        
+        activeController?.let { controller ->
+            mediaCallback?.let { callback ->
+                try {
+                    controller.unregisterCallback(callback)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to unregister callback during reinitialize", e)
+                }
+            }
+        }
+        activeController = null
+        mediaCallback = null
+        
+        isInitialized = false
+        
+        initialize()
     }
     
     private fun updateActiveController(controllers: List<MediaController>?) {
         activeController?.let { controller ->
             mediaCallback?.let { callback ->
-                controller.unregisterCallback(callback)
+                try {
+                    controller.unregisterCallback(callback)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to unregister callback", e)
+                }
             }
         }
         
@@ -52,18 +112,30 @@ class MediaManager(private val context: Context) {
         } ?: controllers?.firstOrNull()
         
         activeController?.let { controller ->
+            Log.d(TAG, "Active controller: ${controller.packageName}")
+            
             mediaCallback = object : MediaController.Callback() {
                 override fun onPlaybackStateChanged(state: PlaybackState?) {
-                    updateMediaState()
+                    handler.post { updateMediaState() }
                 }
                 
                 override fun onMetadataChanged(metadata: MediaMetadata?) {
-                    updateMediaState()
+                    handler.post { updateMediaState() }
+                }
+                
+                override fun onSessionDestroyed() {
+                    handler.post {
+                        IslandStateManager.processEvent(IslandEvent.MediaStop)
+                    }
                 }
             }
             
-            controller.registerCallback(mediaCallback!!, handler)
-            updateMediaState()
+            try {
+                controller.registerCallback(mediaCallback!!, handler)
+                updateMediaState()
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to register callback", e)
+            }
         }
     }
     
@@ -74,12 +146,25 @@ class MediaManager(private val context: Context) {
         
         val isPlaying = playbackState?.state == PlaybackState.STATE_PLAYING
         
+        val title = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE) ?: ""
+        val artist = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: ""
+        
+        if (title.isBlank() && artist.isBlank() && !isPlaying) {
+            return
+        }
+        
+        val albumArt = try {
+            metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART) 
+                ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
+        } catch (e: Exception) {
+            null
+        }
+        
         val mediaState = MediaState(
             isPlaying = isPlaying,
-            title = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE) ?: "",
-            artist = metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: "",
-            albumArt = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART) 
-                ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART),
+            title = title,
+            artist = artist,
+            albumArt = albumArt,
             duration = metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0,
             position = playbackState?.position ?: 0,
             appPackage = controller.packageName
@@ -111,11 +196,19 @@ class MediaManager(private val context: Context) {
     }
     
     fun play() {
-        activeController?.transportControls?.play()
+        try {
+            activeController?.transportControls?.play()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to play", e)
+        }
     }
     
     fun pause() {
-        activeController?.transportControls?.pause()
+        try {
+            activeController?.transportControls?.pause()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to pause", e)
+        }
     }
     
     fun playPause() {
@@ -128,32 +221,56 @@ class MediaManager(private val context: Context) {
     }
     
     fun next() {
-        activeController?.transportControls?.skipToNext()
+        try {
+            activeController?.transportControls?.skipToNext()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to skip next", e)
+        }
     }
     
     fun previous() {
-        activeController?.transportControls?.skipToPrevious()
+        try {
+            activeController?.transportControls?.skipToPrevious()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to skip previous", e)
+        }
     }
     
     fun seekTo(position: Long) {
-        activeController?.transportControls?.seekTo(position)
+        try {
+            activeController?.transportControls?.seekTo(position)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to seek", e)
+        }
     }
     
     fun stop() {
-        activeController?.transportControls?.stop()
+        try {
+            activeController?.transportControls?.stop()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to stop", e)
+        }
     }
     
     fun release() {
         stopPositionUpdates()
         activeController?.let { controller ->
             mediaCallback?.let { callback ->
-                controller.unregisterCallback(callback)
+                try {
+                    controller.unregisterCallback(callback)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to unregister callback during release", e)
+                }
             }
         }
-        try {
-            mediaSessionManager?.removeOnActiveSessionsChangedListener(sessionListener)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        if (isListenerRegistered) {
+            try {
+                mediaSessionManager?.removeOnActiveSessionsChangedListener(sessionListener)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to remove session listener", e)
+            }
+            isListenerRegistered = false
         }
+        isInitialized = false
     }
 }
