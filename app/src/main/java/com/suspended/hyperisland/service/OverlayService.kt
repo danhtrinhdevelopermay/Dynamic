@@ -13,6 +13,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,6 +50,7 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         const val ACTION_STOP_TIMER = "com.suspended.hyperisland.STOP_TIMER"
         const val ACTION_TOGGLE_TIMER = "com.suspended.hyperisland.TOGGLE_TIMER"
         const val EXTRA_TIMER_DURATION = "timer_duration"
+        private const val BRING_TO_FRONT_INTERVAL = 3000L
         
         fun start(context: Context) {
             val intent = Intent(context, OverlayService::class.java)
@@ -89,6 +91,10 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
     
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val handler = Handler(Looper.getMainLooper())
+    
+    private var alwaysOnTop = true
+    private var bringToFrontRunnable: Runnable? = null
+    private var focusChangeListener: ViewTreeObserver.OnWindowFocusChangeListener? = null
     
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
@@ -157,6 +163,16 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
                 updateOverlayPosition(x, y)
             }
         }
+        
+        serviceScope.launch {
+            settingsManager.alwaysOnTop.collect { enabled ->
+                alwaysOnTop = enabled
+                Log.d(TAG, "Always on top setting changed: $enabled")
+                if (enabled) {
+                    bringOverlayToFront()
+                }
+            }
+        }
     }
     
     private fun updateOverlayPosition(x: Int, y: Int) {
@@ -205,7 +221,8 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
@@ -230,9 +247,69 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         try {
             windowManager.addView(overlayView, overlayParams)
             Log.d(TAG, "Overlay view added successfully")
+            
+            startBringToFrontCheck()
+            setupFocusChangeListener()
         } catch (e: Exception) {
             Log.e(TAG, "Failed to add overlay view", e)
         }
+    }
+    
+    private fun bringOverlayToFront() {
+        if (!alwaysOnTop) return
+        
+        overlayView?.let { view ->
+            overlayParams?.let { params ->
+                try {
+                    if (view.isAttachedToWindow) {
+                        windowManager.removeViewImmediate(view)
+                    }
+                    windowManager.addView(view, params)
+                    Log.d(TAG, "Overlay brought to front")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to bring overlay to front", e)
+                }
+            }
+        }
+    }
+    
+    private fun startBringToFrontCheck() {
+        bringToFrontRunnable = object : Runnable {
+            override fun run() {
+                if (alwaysOnTop) {
+                    bringOverlayToFront()
+                }
+                handler.postDelayed(this, BRING_TO_FRONT_INTERVAL)
+            }
+        }
+        handler.postDelayed(bringToFrontRunnable!!, BRING_TO_FRONT_INTERVAL)
+    }
+    
+    private fun stopBringToFrontCheck() {
+        bringToFrontRunnable?.let { handler.removeCallbacks(it) }
+        bringToFrontRunnable = null
+    }
+    
+    private fun setupFocusChangeListener() {
+        overlayView?.let { view ->
+            focusChangeListener = ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
+                if (!hasFocus && alwaysOnTop) {
+                    handler.postDelayed({
+                        bringOverlayToFront()
+                    }, 100)
+                }
+            }
+            view.viewTreeObserver.addOnWindowFocusChangeListener(focusChangeListener)
+        }
+    }
+    
+    private fun removeFocusChangeListener() {
+        overlayView?.let { view ->
+            focusChangeListener?.let { listener ->
+                view.viewTreeObserver.removeOnWindowFocusChangeListener(listener)
+            }
+        }
+        focusChangeListener = null
     }
     
     private fun handleEvent(event: IslandEvent) {
@@ -275,6 +352,8 @@ class OverlayService : Service(), LifecycleOwner, SavedStateRegistryOwner {
         lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         
         serviceScope.cancel()
+        stopBringToFrontCheck()
+        removeFocusChangeListener()
         
         NotificationListenerService.setConnectionCallback(null)
         IslandStateManager.removeEventListener(eventListener)

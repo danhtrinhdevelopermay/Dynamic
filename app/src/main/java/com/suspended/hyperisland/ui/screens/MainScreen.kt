@@ -41,6 +41,7 @@ fun MainScreen(
     val positionX by settingsManager.positionX.collectAsState(initial = SettingsManager.DEFAULT_POSITION_X)
     val positionY by settingsManager.positionY.collectAsState(initial = SettingsManager.DEFAULT_POSITION_Y)
     val sizeScale by settingsManager.sizeScale.collectAsState(initial = SettingsManager.DEFAULT_SIZE_SCALE)
+    val alwaysOnTop by settingsManager.alwaysOnTop.collectAsState(initial = SettingsManager.DEFAULT_ALWAYS_ON_TOP)
     
     var showTimerDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
@@ -333,6 +334,7 @@ fun MainScreen(
             positionX = positionX,
             positionY = positionY,
             sizeScale = sizeScale,
+            alwaysOnTop = alwaysOnTop,
             onPositionXChange = { x ->
                 scope.launch { settingsManager.setPositionX(x) }
             },
@@ -341,6 +343,9 @@ fun MainScreen(
             },
             onSizeScaleChange = { scale ->
                 scope.launch { settingsManager.setSizeScale(scale) }
+            },
+            onAlwaysOnTopChange = { enabled ->
+                scope.launch { settingsManager.setAlwaysOnTop(enabled) }
             },
             onReset = {
                 scope.launch { settingsManager.resetToDefaults() }
@@ -541,9 +546,11 @@ private fun SettingsDialog(
     positionX: Int,
     positionY: Int,
     sizeScale: Float,
+    alwaysOnTop: Boolean,
     onPositionXChange: (Int) -> Unit,
     onPositionYChange: (Int) -> Unit,
     onSizeScaleChange: (Float) -> Unit,
+    onAlwaysOnTopChange: (Boolean) -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -557,7 +564,7 @@ private fun SettingsDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Position & Size",
+                    text = "Settings",
                     color = IslandColors.TextPrimary,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -579,6 +586,39 @@ private fun SettingsDialog(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Always on Top",
+                            color = IslandColors.TextPrimary,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = "Keep Dynamic Island above other overlays",
+                            color = IslandColors.TextSecondary,
+                            fontSize = 12.sp
+                        )
+                    }
+                    
+                    Switch(
+                        checked = alwaysOnTop,
+                        onCheckedChange = onAlwaysOnTopChange,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = IslandColors.Primary,
+                            checkedTrackColor = IslandColors.Primary.copy(alpha = 0.5f),
+                            uncheckedThumbColor = IslandColors.TextSecondary,
+                            uncheckedTrackColor = IslandColors.SurfaceVariant
+                        )
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
                 Text(
                     text = "Horizontal Position (X)",
                     color = IslandColors.TextSecondary,
@@ -682,7 +722,7 @@ private fun SettingsDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
-                    text = "Changes are applied instantly. Use the sliders to adjust the Dynamic Island position and size in real-time.",
+                    text = "Changes are applied instantly.",
                     color = IslandColors.TextTertiary,
                     fontSize = 12.sp
                 )

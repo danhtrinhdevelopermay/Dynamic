@@ -3,6 +3,7 @@ package com.suspended.hyperisland.manager
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -18,10 +19,12 @@ class SettingsManager(private val context: Context) {
         private val POSITION_X = intPreferencesKey("position_x")
         private val POSITION_Y = intPreferencesKey("position_y")
         private val SIZE_SCALE = floatPreferencesKey("size_scale")
+        private val ALWAYS_ON_TOP = booleanPreferencesKey("always_on_top")
         
         const val DEFAULT_POSITION_X = 0
         const val DEFAULT_POSITION_Y = 0
         const val DEFAULT_SIZE_SCALE = 1.0f
+        const val DEFAULT_ALWAYS_ON_TOP = true
         
         const val MIN_SIZE_SCALE = 0.5f
         const val MAX_SIZE_SCALE = 1.5f
@@ -44,6 +47,10 @@ class SettingsManager(private val context: Context) {
         preferences[SIZE_SCALE] ?: DEFAULT_SIZE_SCALE
     }
     
+    val alwaysOnTop: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[ALWAYS_ON_TOP] ?: DEFAULT_ALWAYS_ON_TOP
+    }
+    
     suspend fun setPositionX(x: Int) {
         context.dataStore.edit { preferences ->
             preferences[POSITION_X] = x.coerceIn(MIN_POSITION_X, MAX_POSITION_X)
@@ -62,11 +69,18 @@ class SettingsManager(private val context: Context) {
         }
     }
     
+    suspend fun setAlwaysOnTop(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[ALWAYS_ON_TOP] = enabled
+        }
+    }
+    
     suspend fun resetToDefaults() {
         context.dataStore.edit { preferences ->
             preferences[POSITION_X] = DEFAULT_POSITION_X
             preferences[POSITION_Y] = DEFAULT_POSITION_Y
             preferences[SIZE_SCALE] = DEFAULT_SIZE_SCALE
+            preferences[ALWAYS_ON_TOP] = DEFAULT_ALWAYS_ON_TOP
         }
     }
 }

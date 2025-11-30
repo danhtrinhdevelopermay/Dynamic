@@ -57,10 +57,16 @@ Push to main/master branch triggers automatic APK build. Download from Releases.
 - FOREGROUND_SERVICE - Background operation
 
 ## Recent Changes
+- **2025-11-30**: Added "Always on Top" feature for Dynamic Island
+  - Overlay automatically stays above other app overlays
+  - Uses periodic bring-to-front mechanism (every 3 seconds)
+  - Focus change listener for instant recovery when covered
+  - Toggle switch in Settings to enable/disable this feature
+  - Default: enabled (always on top)
 - **2025-11-30**: Added position and size customization for Dynamic Island
   - Users can now adjust horizontal position (X: -200px to +200px)
-  - Users can now adjust vertical position (Y: 0px to +400px)
-  - Users can now scale the size (50% to 200%)
+  - Users can now adjust vertical position (Y: -50px to +200px)
+  - Users can now scale the size (50% to 150%)
   - Settings are saved using DataStore and persist across app restarts
   - Changes apply in real-time while adjusting sliders
   - Added reset button to restore default settings
