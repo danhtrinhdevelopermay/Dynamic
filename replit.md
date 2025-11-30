@@ -59,11 +59,12 @@ Push to main/master branch triggers automatic APK build. Download from Releases.
 ## Recent Changes
 - **2025-11-30**: Added position and size customization for Dynamic Island
   - Users can now adjust horizontal position (X: -200px to +200px)
-  - Users can now adjust vertical position (Y: -50px to +200px)
-  - Users can now scale the size (50% to 150%)
+  - Users can now adjust vertical position (Y: 0px to +400px)
+  - Users can now scale the size (50% to 200%)
   - Settings are saved using DataStore and persist across app restarts
   - Changes apply in real-time while adjusting sliders
   - Added reset button to restore default settings
+  - Fixed memory leak: coroutine scope properly cancelled in OverlayService.onDestroy()
 - **2025-11-30**: Fixed corrupted Gradle wrapper files that were causing GitHub Actions build failures
   - **Issue 1**: `gradlew` script had corrupted sed command causing `./gradlew: 208: s~.*~\&'~; : not found`
   - **Issue 2**: `gradle-wrapper.jar` was corrupted causing `no main manifest attribute` error
