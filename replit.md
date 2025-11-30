@@ -57,9 +57,11 @@ Push to main/master branch triggers automatic APK build. Download from Releases.
 - FOREGROUND_SERVICE - Background operation
 
 ## Recent Changes
-- **2025-11-30**: Fixed corrupted `gradlew` script that was causing GitHub Actions build failures
-  - Error was: `./gradlew: 208: s~.*~\&'~; : not found` and `Could not find or load main class "-Xmx64m"`
-  - Solution: Replaced with latest official Gradle wrapper script from gradle/gradle repository
+- **2025-11-30**: Fixed corrupted Gradle wrapper files that were causing GitHub Actions build failures
+  - **Issue 1**: `gradlew` script had corrupted sed command causing `./gradlew: 208: s~.*~\&'~; : not found`
+  - **Issue 2**: `gradle-wrapper.jar` was corrupted causing `no main manifest attribute` error
+  - **Solution**: Regenerated both files using official Gradle 8.2 distribution
+  - **Verification**: gradle-wrapper.jar SHA256: `a8451eeda314d0568b5340498b36edf147a8f0d692c5ff58082d477abe9146e4` (matches GitHub Actions validation)
 - Initial project setup with full HyperOS 3-style Dynamic Island
 - Implemented all core features: media, timer, charging, flashlight, notifications
 - Added GitHub Actions for automated APK builds

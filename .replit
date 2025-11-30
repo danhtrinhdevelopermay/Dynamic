@@ -24,3 +24,7 @@ args = "./gradlew tasks --no-daemon 2>&1 || echo \"Android SDK not available - t
 
 [workflows.workflow.metadata]
 outputType = "console"
+
+[nix]
+channel = "stable-25_05"
+packages = ["unzip"]
